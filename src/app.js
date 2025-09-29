@@ -5,20 +5,33 @@ const User = require("./models/user");
 
 const PORT = 7777;
 
+app.use(express.json());
+
 app.post("/signup", async (req, res) => {
-  // Creating new instance of User
-  const user = new User({
-    firstName: "Psresh",
-    lastName: "Malpure",
-    emailId: "Paresh@gmail.com",
-    password: "Paresh@123",
-  });
+  // Creating a instance of the User model
+  const user = new User(req.body);
 
   try {
     await user.save();
     res.send("User is saved successfully!!");
   } catch (err) {
-    res.send("Something error in user saving!!! " + err);
+    res.status(400).send("Something error in user saving!!! " + err.message);
+  }
+});
+
+/**
+ * Creating API - find User by emailId
+ */
+app.get("/user", async (req, res) => {
+  try {
+    const users = await User.find({ emailId: req.body.emailId });
+    if (users.length === 0) {
+      res.send("User not found!!!");
+    } else {
+      res.send(users);
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong!");
   }
 });
 
