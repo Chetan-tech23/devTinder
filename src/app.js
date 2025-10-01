@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const { validateSignupData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 const PORT = 7777;
 
@@ -11,14 +13,26 @@ app.use(express.json());
  * Creating API - Signup
  */
 app.post("/signup", async (req, res) => {
-  // Creating a instance of the User model
-  const user = new User(req.body);
-
   try {
+    // Validate Request Data
+    validateSignupData(req);
+
+    const { firstName, lastName, emailId, password } = req.body;
+
+    // Encrypt the password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
+
     await user.save();
     res.send("User is registered successfully!!");
   } catch (err) {
-    res.status(400).send("Something went wrong in user register!!! " + err.message);
+    res.status(400).send("ERROR: " + err.message);
   }
 });
 
@@ -77,13 +91,25 @@ app.patch("/user/:userId", async (req, res) => {
   const userId = req.params.userId;
   const data = req.body;
   try {
-    const ALLOWED_FIELDS = ["firstName", "lastName", "age", "gender", "photoUrl", "about", "skills"];
-    const isAllowedUser = Object.keys(data).every(k => ALLOWED_FIELDS.includes(k));
-    if(!isAllowedUser){
-      throw new Error("Update Failed : Random or restricted Fields are not allowd");
+    const ALLOWED_FIELDS = [
+      "firstName",
+      "lastName",
+      "age",
+      "gender",
+      "photoUrl",
+      "about",
+      "skills",
+    ];
+    const isAllowedUser = Object.keys(data).every((k) =>
+      ALLOWED_FIELDS.includes(k)
+    );
+    if (!isAllowedUser) {
+      throw new Error(
+        "Update Failed : Random or restricted Fields are not allowd"
+      );
     }
 
-    if(data.skills.length > 10){
+    if (data.skills.length > 10) {
       throw new Error("Update Failed : More than 10 skills not allowed!");
     }
 
