@@ -10,7 +10,7 @@ const PORT = 7777;
 app.use(express.json());
 
 /**
- * Creating API - Signup
+ * API - Signup
  */
 app.post("/signup", async (req, res) => {
   try {
@@ -37,7 +37,31 @@ app.post("/signup", async (req, res) => {
 });
 
 /**
- * Creating API - find User by emailId
+ * API - Login
+ */
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+
+    const user = await User.findOne({ emailId: emailId });
+
+    if (!user) {
+      throw new Error("Invalid credentials!");
+    }
+
+    const isValidCred = await bcrypt.compare(password, user.password);
+    if (!isValidCred) {
+      throw new Error("Invalid credentials!");
+    } else {
+      res.send("Login successfull!!!");
+    }
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
+  }
+});
+
+/**
+ * API - find User by emailId
  */
 app.get("/user", async (req, res) => {
   try {
@@ -53,7 +77,7 @@ app.get("/user", async (req, res) => {
 });
 
 /**
- * Creating API - find all user
+ *  API - find all user
  */
 app.get("/feed", async (req, res) => {
   try {
@@ -69,7 +93,7 @@ app.get("/feed", async (req, res) => {
 });
 
 /**
- * Creating API - Delete User
+ *  API - Delete User
  */
 app.delete("/user", async (req, res) => {
   try {
@@ -85,7 +109,7 @@ app.delete("/user", async (req, res) => {
 });
 
 /**
- * Creating API - Update data of User
+ *  API - Update data of User
  */
 app.patch("/user/:userId", async (req, res) => {
   const userId = req.params.userId;
