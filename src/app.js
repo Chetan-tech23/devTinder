@@ -35,6 +35,54 @@ app.get("/user", async (req, res) => {
   }
 });
 
+/**
+ * Creating API - find all user
+ */
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({});
+    if (users.length === 0) {
+      res.send("User not found!");
+    } else {
+      res.send(users);
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong!!!");
+  }
+});
+
+/**
+ * Creating API - Delete User
+ */
+app.delete("/user", async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.body.userId);
+    if (user.length === 0) {
+      res.send("User not found!");
+    } else {
+      res.send("User deleted successfully!");
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong!!!");
+  }
+});
+
+/**
+ * Creating API - Update data of User
+ */
+ app.patch("/user", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.body.userId, req.body.update);
+    if (user.length === 0) {
+      res.send("User not found!");
+    } else {
+      res.send("User updated successfully!");
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong!!!");
+  }
+});
+
 connectDB()
   .then(() => {
     console.log("Database successfully established...");
